@@ -1,0 +1,85 @@
+terraform {
+  required_providers {
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = ">= 2.0.0"
+    }
+  }
+}
+
+provider "docker" {}
+
+# Nginx image and container
+resource "docker_image" "nginx" {
+  name         = "nginx:latest"
+  keep_locally = false
+}
+
+resource "docker_container" "nginx1" {
+  name  = "nginx1"
+  image = docker_image.nginx.name  # Use the `name` attribute instead of `latest`
+
+  ports {
+    internal = 80
+    external = 8081
+  }
+}
+
+resource "docker_container" "nginx2" {
+  name  = "nginx2"
+  image = docker_image.nginx.name  # Use the `name` attribute instead of `latest`
+
+  ports {
+    internal = 80
+    external = 8082
+  }
+}
+
+# Custom application image and container
+resource "docker_image" "myapp" {
+  name         = "shishirsv/wisentel_app_v1.0.0"
+  keep_locally = false
+}
+
+resource "docker_container" "myapp1" {
+  name  = "myapp1"
+  image = docker_image.myapp.name  # Use the `name` attribute instead of `latest`
+
+  ports {
+    internal = 8000
+    external = 8000
+  }
+}
+
+# Custom database image and container
+resource "docker_image" "mydb" {
+  name         = "shishirsv/mongo_backend"
+  keep_locally = false
+}
+
+resource "docker_container" "mydb1" {
+  name  = "mydb1"
+  image = docker_image.mydb.name  # Use the `name` attribute instead of `latest`
+
+  ports {
+    internal = 3000
+    external = 3000
+  }
+}
+
+# Outputs for accessing the services
+output "nginx1_url" {
+  value = "http://localhost:8081"
+}
+
+output "nginx2_url" {
+  value = "http://localhost:8082"
+}
+
+output "myapp1_url" {
+  value = "http://localhost:8000"
+}
+
+output "mydb1_port" {
+  value = "localhost:3000"
+}
